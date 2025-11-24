@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trắc nghiệm Phân Hữu Cơ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c28 0%, #2d5f3e 50%, #3a7d4f 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #2e7d32;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ffd54f, #ffeb3b, #fbc02d);
+            width: 0%;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px rgba(255, 235, 59, 0.5);
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .question-container {
+            display: none;
+            animation: slideIn 0.4s ease-out;
+        }
+
+        .question-container.active {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .question-number {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+
+        .question-text {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 18px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .option:hover {
+            background: #e8f5e9;
+            border-color: #4CAF50;
+            transform: translateX(5px);
+        }
+
+        .option input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #4CAF50;
+        }
+
+        .option label {
+            cursor: pointer;
+            flex: 1;
+            font-size: 1.05em;
+            color: #333;
+        }
+
+        .option.correct {
+            background: #c8e6c9;
+            border-color: #4CAF50;
+        }
+
+        .option.wrong {
+            background: #ffcdd2;
+            border-color: #f44336;
+        }
+
+        .explanation {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            border-radius: 8px;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .explanation.show {
+            display: block;
+        }
+
+        .explanation-title {
+            font-weight: bold;
+            color: #1976D2;
+            margin-bottom: 8px;
+        }
+
+        .explanation-text {
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            flex: 1;
+            min-width: 140px;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.05em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(76, 175, 80, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .result-screen {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .result-screen.show {
+            display: block;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .score-circle {
+            width: 200px;
+            height: 200px;
+            margin: 30px auto;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            box-shadow: 0 10px 30px rgba(76, 175, 80, 0.3);
+        }
+
+        .score-number {
+            font-size: 3.5em;
+            font-weight: bold;
+        }
+
+        .score-text {
+            font-size: 1.2em;
+            margin-top: 10px;
+        }
+
+        .result-message {
+            font-size: 1.5em;
+            color: #333;
+            margin: 30px 0;
+        }
+
+        .result-details {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .result-item {
+            text-align: center;
+        }
+
+        .result-item-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .result-item-label {
+            color: #666;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 1.5em;
+            }
+
+            .header p {
+                font-size: 0.95em;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .question-text {
+                font-size: 1.1em;
+            }
+
+            .option {
+                padding: 14px 16px;
+            }
+
+            .btn {
+                min-width: 100%;
+            }
+
+            .score-circle {
+                width: 160px;
+                height: 160px;
+            }
+
+            .score-number {
+                font-size: 2.5em;
+            }
+
+            .result-details {
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌱 Trắc nghiệm Phân Hữu Cơ</h1>
+            <p>Kiểm tra kiến thức của bạn về phân hữu cơ</p>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <div class="content">
+            <div id="quizContainer"></div>
+            
+            <div class="result-screen" id="resultScreen">
+                <h2 class="result-message" id="resultMessage"></h2>
+                <div class="score-circle">
+                    <div class="score-number" id="scoreNumber"></div>
+                    <div class="score-text">điểm</div>
+                </div>
+                <div class="result-details">
+                    <div class="result-item">
+                        <div class="result-item-value" id="correctCount"></div>
+                        <div class="result-item-label">Đúng</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-item-value" id="wrongCount"></div>
+                        <div class="result-item-label">Sai</div>
+                    </div>
+                </div>
+                <div class="buttons">
+                    <button class="btn btn-primary" onclick="restartQuiz()">Làm lại</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "Phân bón hữu cơ được tạo ra từ:",
+                options: ["Chất hóa học tổng hợp", "Vật chất hữu cơ tự nhiên", "Nước và ánh sáng", "Không khí"],
+                correct: 1,
+                explanation: "Phân hữu cơ có nguồn gốc từ phân chuồng, rác thải thực vật, phụ phẩm nông nghiệp…"
+            },
+            {
+                question: "Loại phân nào sau đây là phân hữu cơ:",
+                options: ["Phân ure", "Phân lân supe", "Phân compost", "Phân kali clorua"],
+                correct: 2,
+                explanation: "Compost được làm từ rác hữu cơ ủ hoai, thuộc phân hữu cơ."
+            },
+            {
+                question: "Vai trò chính của phân hữu cơ là:",
+                options: ["Tăng độ tơi xốp và mùn đất", "Gây chai đất", "Làm cây chết nhanh", "Gây ô nhiễm môi trường"],
+                correct: 0,
+                explanation: "Phân hữu cơ giúp cải tạo cấu trúc đất, tăng độ tơi xốp và hàm lượng mùn."
+            },
+            {
+                question: "Trong quy trình sản xuất phân hữu cơ, bước nào quan trọng nhất để tiêu diệt mầm bệnh?",
+                options: ["Trộn nguyên liệu", "Ủ hiếu khí và kiểm soát nhiệt độ", "Thu gom nguyên liệu", "Đóng gói"],
+                correct: 1,
+                explanation: "Quá trình ủ hiếu khí với nhiệt độ cao giúp tiêu diệt mầm bệnh và hạt giống cỏ dại."
+            },
+            {
+                question: "Phân xanh là:",
+                options: ["Phân chuồng đã ủ", "Cây họ đậu hoặc cỏ dại vùi xuống đất khi còn non", "Phân hóa học tổng hợp", "Phân compost từ rác nhà bếp"],
+                correct: 1,
+                explanation: "Phân xanh là các loại cây trồng, thường là họ đậu, được vùi lại khi còn xanh để bón cho đất."
+            },
+            {
+                question: "Ưu điểm nổi bật của phân hữu cơ so với phân hóa học là:",
+                options: ["Nhả dinh dưỡng nhanh", "An toàn, cải tạo đất lâu dài", "Rẻ hơn tất cả các loại phân", "Không cần chăm sóc cây"],
+                correct: 1,
+                explanation: "Phân hữu cơ an toàn cho môi trường, cải tạo đất lâu dài và bền vững."
+            },
+            {
+                question: "Phân hữu cơ vi sinh khác phân compost ở điểm:",
+                options: ["Có chứa vi sinh vật chọn lọc bổ sung", "Làm từ rác hữu cơ", "Không cải tạo đất", "Là loại phân hóa học"],
+                correct: 0,
+                explanation: "Phân hữu cơ vi sinh có bổ sung các vi sinh vật có lợi được chọn lọc để tăng hiệu quả."
+            },
+            {
+                question: "Sau bao lâu phân compost cơ bản có thể sử dụng được?",
+                options: ["1–2 ngày", "1 tuần", "4–6 tuần", "1 năm"],
+                correct: 2,
+                explanation: "Phân compost thường cần 4-6 tuần để ủ chín hoàn toàn và có thể sử dụng."
+            },
+            {
+                question: "Nguyên liệu 'nâu' trong ủ phân compost là gì?",
+                options: ["Lá khô, rơm, giấy vụn", "Vỏ rau củ, trái cây", "Phân bò tươi", "Vi sinh vật"],
+                correct: 0,
+                explanation: "Nguyên liệu nâu giàu carbon như lá khô, rơm, giấy cần thiết để cân bằng với nguyên liệu xanh."
+            },
+            {
+                question: "Một trong những hạn chế của phân hữu cơ là:",
+                options: ["Gây ô nhiễm môi trường", "Tác dụng chậm, dinh dưỡng thấp", "Cháy rễ cây ngay lập tức", "Là hóa chất độc hại"],
+                correct: 1,
+                explanation: "Phân hữu cơ có hàm lượng dinh dưỡng thấp hơn và tác dụng chậm hơn so với phân hóa học."
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let answered = false;
+        let userAnswers = [];
+
+        function renderQuiz() {
+            const container = document.getElementById('quizContainer');
+            container.innerHTML = '';
+
+            questions.forEach((q, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = `question-container ${index === 0 ? 'active' : ''}`;
+                questionDiv.id = `question-${index}`;
+
+                let optionsHTML = '';
+                q.options.forEach((option, optIndex) => {
+                    optionsHTML += `
+                        <div class="option" onclick="selectOption(${index}, ${optIndex})">
+                            <input type="radio" name="q${index}" id="q${index}_opt${optIndex}" value="${optIndex}">
+                            <label for="q${index}_opt${optIndex}">${String.fromCharCode(65 + optIndex)}. ${option}</label>
+                        </div>
+                    `;
+                });
+
+                questionDiv.innerHTML = `
+                    <div class="question-number">Câu ${index + 1}/10</div>
+                    <div class="question-text">${q.question}</div>
+                    <div class="options">${optionsHTML}</div>
+                    <div class="explanation" id="explanation-${index}">
+                        <div class="explanation-title">✓ Đáp án đúng: ${String.fromCharCode(65 + q.correct)}</div>
+                        <div class="explanation-text">${q.explanation}</div>
+                    </div>
+                    <div class="buttons">
+                        ${index > 0 ? '<button class="btn btn-secondary" onclick="prevQuestion()">Câu trước</button>' : ''}
+                        <button class="btn btn-primary" id="checkBtn-${index}" onclick="checkAnswer()" disabled>Kiểm tra</button>
+                        <button class="btn btn-primary" id="nextBtn-${index}" onclick="nextQuestion()" style="display:none;">${index < 9 ? 'Câu tiếp' : 'Xem kết quả'}</button>
+                    </div>
+                `;
+
+                container.appendChild(questionDiv);
+            });
+        }
+
+        function selectOption(questionIndex, optionIndex) {
+            if (userAnswers[questionIndex] !== undefined) return;
+
+            const radio = document.getElementById(`q${questionIndex}_opt${optionIndex}`);
+            radio.checked = true;
+            
+            const checkBtn = document.getElementById(`checkBtn-${questionIndex}`);
+            checkBtn.disabled = false;
+        }
+
+        function checkAnswer() {
+            const selected = document.querySelector(`input[name="q${currentQuestion}"]:checked`);
+            if (!selected) return;
+
+            const selectedValue = parseInt(selected.value);
+            userAnswers[currentQuestion] = selectedValue;
+
+            const options = document.querySelectorAll(`#question-${currentQuestion} .option`);
+            options.forEach((opt, idx) => {
+                opt.style.pointerEvents = 'none';
+                if (idx === questions[currentQuestion].correct) {
+                    opt.classList.add('correct');
+                } else if (idx === selectedValue && selectedValue !== questions[currentQuestion].correct) {
+                    opt.classList.add('wrong');
+                }
+            });
+
+            if (selectedValue === questions[currentQuestion].correct) {
+                score++;
+            }
+
+            document.getElementById(`explanation-${currentQuestion}`).classList.add('show');
+            document.getElementById(`checkBtn-${currentQuestion}`).style.display = 'none';
+            document.getElementById(`nextBtn-${currentQuestion}`).style.display = 'block';
+
+            updateProgress();
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                document.getElementById(`question-${currentQuestion}`).classList.remove('active');
+                currentQuestion++;
+                document.getElementById(`question-${currentQuestion}`).classList.add('active');
+            } else {
+                showResults();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                document.getElementById(`question-${currentQuestion}`).classList.remove('active');
+                currentQuestion--;
+                document.getElementById(`question-${currentQuestion}`).classList.add('active');
+            }
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+
+        function showResults() {
+            document.getElementById('quizContainer').style.display = 'none';
+            document.getElementById('resultScreen').classList.add('show');
+            
+            const percentage = (score / questions.length) * 10;
+            document.getElementById('scoreNumber').textContent = percentage.toFixed(1);
+            document.getElementById('correctCount').textContent = score;
+            document.getElementById('wrongCount').textContent = questions.length - score;
+
+            let message = '';
+            if (score === 10) {
+                message = '🎉 Xuất sắc! Bạn đã trả lời đúng tất cả!';
+            } else if (score >= 8) {
+                message = '👏 Rất tốt! Bạn có kiến thức vững vàng!';
+            } else if (score >= 6) {
+                message = '👍 Khá! Hãy tiếp tục học tập!';
+            } else if (score >= 4) {
+                message = '💪 Cố gắng hơn nữa nhé!';
+            } else {
+                message = '📚 Hãy ôn lại kiến thức nhé!';
+            }
+            document.getElementById('resultMessage').textContent = message;
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            userAnswers = [];
+            document.getElementById('resultScreen').classList.remove('show');
+            document.getElementById('quizContainer').style.display = 'block';
+            renderQuiz();
+            updateProgress();
+        }
+
+        renderQuiz();
+        updateProgress();
+    </script>
+</body>
+</html>
