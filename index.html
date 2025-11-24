@@ -376,7 +376,17 @@
     </div>
 
     <script>
-        const questions = [
+        // Hàm xáo trộn mảng (Fisher-Yates shuffle)
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        const originalQuestions = [
             {
                 question: "Phân bón hữu cơ được tạo ra từ:",
                 options: ["Chất hóa học tổng hợp", "Vật chất hữu cơ tự nhiên", "Nước và ánh sáng", "Không khí"],
@@ -439,10 +449,36 @@
             }
         ];
 
+        let questions = [];
         let currentQuestion = 0;
         let score = 0;
         let answered = false;
         let userAnswers = [];
+
+        // Xáo trộn câu hỏi và đáp án
+        function initializeQuiz() {
+            // Xáo trộn thứ tự câu hỏi
+            questions = shuffleArray(originalQuestions).map(q => {
+                // Tạo mảng chỉ số để theo dõi đáp án đúng sau khi xáo trộn
+                const optionsWithIndex = q.options.map((opt, idx) => ({
+                    text: opt,
+                    isCorrect: idx === q.correct
+                }));
+                
+                // Xáo trộn đáp án
+                const shuffledOptions = shuffleArray(optionsWithIndex);
+                
+                // Tìm vị trí mới của đáp án đúng
+                const newCorrectIndex = shuffledOptions.findIndex(opt => opt.isCorrect);
+                
+                return {
+                    question: q.question,
+                    options: shuffledOptions.map(opt => opt.text),
+                    correct: newCorrectIndex,
+                    explanation: q.explanation
+                };
+            });
+        }
 
         function renderQuiz() {
             const container = document.getElementById('quizContainer');
@@ -573,10 +609,13 @@
             userAnswers = [];
             document.getElementById('resultScreen').classList.remove('show');
             document.getElementById('quizContainer').style.display = 'block';
+            initializeQuiz();
             renderQuiz();
             updateProgress();
         }
 
+        // Khởi tạo quiz khi trang được tải
+        initializeQuiz();
         renderQuiz();
         updateProgress();
     </script>
